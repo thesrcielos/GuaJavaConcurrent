@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class HttpServer {
     private static final Map<String, Method> services = new HashMap<>();
     private static final Map<String, List<Parameter>> parameters = new HashMap<>();
-    
+    private static volatile boolean running = true;
     private static String WEB_ROOT_DIR = "public";
 
     public static void loadComponents(String[] args){
@@ -79,6 +79,11 @@ public class HttpServer {
     }
 
     public static void run(String[] args) throws IOException, URISyntaxException {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown hook activated. Closing server...");
+            running = false;
+        }));
+
         ServerSocket serverSocket = null;
         ExecutorService executor = Executors.newFixedThreadPool(10);
         try {
@@ -88,7 +93,6 @@ public class HttpServer {
             System.exit(1);
         }
         loadComponents(args);
-        boolean running = true;
         while(running){
             try {
                 System.out.println("Listo para recibir...");
