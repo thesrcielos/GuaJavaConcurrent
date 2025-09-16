@@ -115,7 +115,6 @@ public class HttpServer {
                 System.exit(1);
             }
         }
-        serverSocket.close();
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException  {

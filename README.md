@@ -113,7 +113,35 @@ Go to the browser and type http://localhost:35000/hello?name=your-name
 Now try the /users endpoint http://localhost:35000/users?name=your-name&height=1.67
 ![](/assets/img2.png)
 
+### JVM Shutdown Hook in Java
 
+The following code registers a **shutdown hook** in the JVM:
+
+```java
+Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        System.out.println("Shutdown hook activated. Closing server...");
+        running = false;
+        try {
+        serverSocket.close();
+        } catch (IOException e) {
+        Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, e);
+    }
+}));
+```
+
+### How it works
+Runtime.getRuntime().addShutdownHook(...) registers a thread that runs when the JVM is shutting down.
+In this case, the hook:
+
+* Prints a message.
+
+* Sets the running flag to false, allowing the main loop to stop gracefully.
+
+* Closes the serverSocket, which unblocks accept() calls and lets the server terminate cleanly.
+
+### Why it’s useful
+
+This mechanism ensures the server shuts down gracefully instead of abruptly, releasing resources like sockets and avoiding inconsistent states.
 ## Usage Examples
 
 ### Basic HTTP Request
