@@ -21,6 +21,7 @@ public class HttpServer {
     private static final Map<String, List<Parameter>> parameters = new HashMap<>();
     private static volatile boolean running = true;
     private static String WEB_ROOT_DIR = "public";
+    private static ServerSocket serverSocket;
 
     public static void loadComponents(String[] args){
         try {
@@ -79,12 +80,6 @@ public class HttpServer {
     }
 
     public static void run(String[] args) throws IOException, URISyntaxException {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Shutdown hook activated. Closing server...");
-            running = false;
-        }));
-
-        ServerSocket serverSocket = null;
         ExecutorService executor = Executors.newFixedThreadPool(10);
         try {
             serverSocket = new ServerSocket(getPort());
@@ -92,6 +87,17 @@ public class HttpServer {
             System.err.println("Could not listen on port: 35000.");
             System.exit(1);
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown hook activated. Closing server...");
+            running = false;
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, e);
+            }
+        }));
+
         loadComponents(args);
         while(running){
             try {
